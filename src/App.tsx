@@ -169,7 +169,7 @@ export default function App() {
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="scrollbar-none flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth px-4 pb-4 sm:gap-6 sm:px-10 md:px-14"
+          className="scrollbar-none flex snap-x snap-mandatory overflow-x-auto scroll-smooth pb-4"
         >
           {weeks.map((week, i) => (
             <div
@@ -177,7 +177,7 @@ export default function App() {
               ref={(el) => {
                 panelRefs.current[i] = el;
               }}
-              className="snap-center"
+              className="flex w-full shrink-0 snap-center justify-center px-6"
             >
               <WeekPanel
                 week={week}

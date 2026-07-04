@@ -49,7 +49,7 @@ export default function WeekPanel({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.5, delay: index * 0.05, ease: "easeOut" }}
-      className="flex h-full w-[300px] shrink-0 snap-center flex-col rounded-3xl bg-slate-100/80 px-5 pt-6 pb-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-slate-200/60 transition-shadow hover:shadow-md sm:w-[320px]"
+      className="flex h-full w-full max-w-sm shrink-0 flex-col rounded-3xl bg-slate-100/80 px-5 pt-6 pb-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-slate-200/60 transition-shadow hover:shadow-md"
     >
       {/* Header */}
       <div className="mb-1 flex items-center justify-center">
