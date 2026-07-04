@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Clock3 } from "lucide-react";
 import WeekPanel from "./components/WeekPanel";
 import MonthsModal from "./components/MonthsModal";
@@ -139,7 +138,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* Top nav */}
-      <header className="sticky top-0 z-30 border-b border-slate-100 bg-white/80 backdrop-blur-md">
+      <header className="safe-top sticky top-0 z-30 border-b border-slate-100 bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
           <div className="flex items-center gap-2.5">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500 text-white shadow-sm shadow-blue-200">
@@ -150,37 +149,8 @@ export default function App() {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="mx-auto max-w-3xl px-5 pb-2 pt-12 text-center sm:pt-16">
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-500"
-        >
-          Weekly hours &amp; pay
-        </motion.p>
-        <motion.h1
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.05 }}
-          className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl"
-        >
-          Your Monthly Timesheet
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.1 }}
-          className="mx-auto mt-3 max-w-xl text-[15px] leading-relaxed text-slate-500"
-        >
-          Log start and end times for every shift, watch hours tally up automatically, and review
-          your month's total salary at a glance.
-        </motion.p>
-      </section>
-
       {/* Carousel */}
-      <section className="relative mx-auto max-w-6xl px-2 py-10 sm:px-6">
+      <section className="relative mx-auto max-w-6xl px-2 pb-10 pt-8 sm:px-6 sm:pt-12">
         <button
           onClick={() => scrollToIndex(activeIndex - 1)}
           className="absolute left-1 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-500 shadow-lg ring-1 ring-slate-200 transition hover:text-blue-500 hover:shadow-xl md:flex"
@@ -240,7 +210,7 @@ export default function App() {
         </div>
       </section>
 
-      <footer className="border-t border-slate-100 py-8 text-center text-xs text-slate-400">
+      <footer className="safe-bottom border-t border-slate-100 py-8 text-center text-xs text-slate-400">
         Built with care · Your data stays on this device
       </footer>
 
