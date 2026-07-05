@@ -39,11 +39,22 @@ export function nextMonth(ref: MonthRef): MonthRef {
   return { year: ref.year, monthIndex: ref.monthIndex + 1 };
 }
 
+/**
+ * Splits a month into calendar weeks that always end on Sunday (and start on Monday),
+ * except for the first week of the month (which may start mid-week on day 1) and the
+ * last week of the month (which may end mid-week on the month's last day).
+ */
 export function generateWeeks(year: number, monthIndex: number): Week[] {
   const total = daysInMonth(year, monthIndex);
   const weeks: Week[] = [];
-  for (let start = 1; start <= total; start += 7) {
-    const end = Math.min(start + 6, total);
+  let start = 1;
+
+  while (start <= total) {
+    const startDate = new Date(year, monthIndex, start);
+    const dow = startDate.getDay(); // 0 = Sun ... 6 = Sat
+    const daysUntilSunday = dow === 0 ? 0 : 7 - dow;
+    const end = Math.min(start + daysUntilSunday, total);
+
     const days: DayEntry[] = [];
     for (let d = start; d <= end; d++) {
       const date = new Date(year, monthIndex, d);
@@ -54,7 +65,6 @@ export function generateWeeks(year: number, monthIndex: number): Week[] {
         end: null,
       });
     }
-    const startDate = new Date(year, monthIndex, start);
     const endDate = new Date(year, monthIndex, end);
     const label = `${MONTH_NAMES[startDate.getMonth()].slice(0, 3)} ${start} – ${MONTH_NAMES[
       endDate.getMonth()
@@ -65,7 +75,10 @@ export function generateWeeks(year: number, monthIndex: number): Week[] {
       days,
       isLast: end === total,
     });
+
+    start = end + 1;
   }
+
   return weeks;
 }
 
