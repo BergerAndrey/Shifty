@@ -1,4 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { hapticTick } from "../utils/haptics";
+
+/** How many times the value list is repeated to fake infinite/circular scrolling. */
+const REPEAT = 9;
 
 interface WheelColumnProps {
   values: string[];
@@ -10,29 +14,39 @@ interface WheelColumnProps {
 
 function WheelColumn({ values, index, onSettle, itemHeight, visibleCount }: WheelColumnProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState(index);
+  const length = values.length;
+  const middleSet = Math.floor(REPEAT / 2);
+  const extended = Array.from({ length: length * REPEAT }, (_, i) => values[i % length]);
+
+  const [pos, setPos] = useState(middleSet * length + index);
   const settleTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rafRef = useRef<number | null>(null);
+  const lastTick = useRef<number>(index);
 
   const padding = itemHeight * Math.floor(visibleCount / 2);
 
-  // initialize scroll position
+  // initialize scroll position at the middle repeat set
   useEffect(() => {
     if (containerRef.current) {
-      containerRef.current.scrollTop = index * itemHeight;
-      setPos(index);
+      const raw = middleSet * length + index;
+      containerRef.current.scrollTop = raw * itemHeight;
+      setPos(raw);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // keep in sync if index changes externally
+  // keep in sync if index changes externally (e.g. re-opened with a different value)
   useEffect(() => {
-    if (containerRef.current) {
-      const target = index * itemHeight;
-      if (Math.abs(containerRef.current.scrollTop - target) > 1) {
-        containerRef.current.scrollTop = target;
-        setPos(index);
-      }
+    const el = containerRef.current;
+    if (!el) return;
+    const currentRaw = el.scrollTop / itemHeight;
+    const currentValue = ((Math.round(currentRaw) % length) + length) % length;
+    if (currentValue !== index) {
+      const currentSet = Math.floor(Math.round(currentRaw) / length);
+      const raw = currentSet * length + index;
+      el.scrollTop = raw * itemHeight;
+      setPos(raw);
+      lastTick.current = index;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
@@ -41,18 +55,35 @@ function WheelColumn({ values, index, onSettle, itemHeight, visibleCount }: Whee
     const el = containerRef.current;
     if (!el) return;
 
+    // Silently recenter into the middle repeat set once the user drifts into
+    // an adjacent set — since every set renders identical content, this jump
+    // is visually undetectable and gives the illusion of infinite scrolling.
+    const setHeight = length * itemHeight;
+    const currentSet = Math.floor(el.scrollTop / setHeight);
+    if (currentSet !== middleSet) {
+      el.scrollTop += (middleSet - currentSet) * setHeight;
+    }
+
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     rafRef.current = requestAnimationFrame(() => {
-      setPos(el.scrollTop / itemHeight);
+      const rawPos = el.scrollTop / itemHeight;
+      setPos(rawPos);
+
+      const rounded = Math.round(rawPos);
+      const valueIndex = ((rounded % length) + length) % length;
+      if (lastTick.current !== valueIndex) {
+        lastTick.current = valueIndex;
+        hapticTick();
+      }
     });
 
     if (settleTimeout.current) clearTimeout(settleTimeout.current);
     settleTimeout.current = setTimeout(() => {
-      const nearest = Math.round(el.scrollTop / itemHeight);
-      const clamped = Math.max(0, Math.min(values.length - 1, nearest));
-      onSettle(clamped);
+      const rounded = Math.round(el.scrollTop / itemHeight);
+      const valueIndex = ((rounded % length) + length) % length;
+      onSettle(valueIndex);
     }, 120);
-  }, [itemHeight, onSettle, values.length]);
+  }, [itemHeight, length, middleSet, onSettle]);
 
   return (
     <div
@@ -61,13 +92,13 @@ function WheelColumn({ values, index, onSettle, itemHeight, visibleCount }: Whee
       className="scrollbar-none relative z-10 flex-1 snap-y snap-mandatory overflow-y-scroll"
       style={{ height: itemHeight * visibleCount, paddingTop: padding, paddingBottom: padding }}
     >
-      {values.map((v, i) => {
+      {extended.map((v, i) => {
         const distance = Math.abs(i - pos);
         const opacity = Math.max(0.18, 1 - distance * 0.32);
         const isCenter = distance < 0.5;
         return (
           <div
-            key={v}
+            key={i}
             className="flex snap-center items-center justify-center select-none"
             style={{ height: itemHeight }}
           >

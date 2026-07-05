@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import WheelPicker from "./WheelPicker";
+import { hapticImpact, hapticSelect } from "../utils/haptics";
 
 interface TimeModalProps {
   open: boolean;
@@ -43,6 +44,7 @@ export default function TimeModal({ open, title, initialValue, onClose, onSave, 
               <div className="flex items-center justify-between border-b border-slate-300/50 px-4 py-3">
                 <button
                   onClick={() => {
+                    hapticSelect();
                     onClear();
                     onClose();
                   }}
@@ -64,6 +66,7 @@ export default function TimeModal({ open, title, initialValue, onClose, onSave, 
 
               <button
                 onClick={() => {
+                  hapticImpact();
                   onSave(`${current.hour.toString().padStart(2, "0")}:${current.minute.toString().padStart(2, "0")}`);
                   onClose();
                 }}
